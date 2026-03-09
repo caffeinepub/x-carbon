@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>X-Carbon – Turning Pollution Into Ink</title>
+  <meta name="description" content="X-Carbon harvests soot from vehicle exhaust and transforms it into usable ink — reducing air pollution one vehicle at a time." />
+  <meta property="og:title" content="X-Carbon – Turning Pollution Into Ink" />
+  <meta property="og:description" content="Capture carbon. Create ink. Change the future." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ===== PHASE 1: SPLASH SCREEN ===== -->
+  <div id="splash" class="phase active">
+    <div class="splash-content">
+      <div class="splash-logo-ring"></div>
+      <div class="splash-logo-ring ring-2"></div>
+      <div class="splash-logo-ring ring-3"></div>
+      <div class="splash-inner">
+        <div class="splash-symbol">⬡</div>
+        <h1 class="splash-title">X-CARBON</h1>
+        <p class="splash-subtitle">Turning Pollution Into Ink</p>
+        <div class="splash-divider"></div>
+        <p class="splash-tagline">Environmental Technology &bull; Carbon Capture &bull; Sustainable Ink</p>
+      </div>
+    </div>
+    <div class="splash-progress-bar">
+      <div class="splash-progress-fill" id="splash-progress"></div>
+    </div>
+    <button class="splash-skip" id="splash-skip" aria-label="Skip intro">Skip intro ›</button>
+  </div>
+
+  <!-- ===== PHASE 2: ACCESS PAGE ===== -->
+  <div id="access-page" class="phase hidden">
+    <div class="access-wrapper">
+      <div class="access-card">
+        <div class="access-brand">
+          <span class="access-brand-symbol">⬡</span>
+          <span class="access-brand-name">X-CARBON</span>
+        </div>
+        <h2 class="access-heading">Choose how you'd like to connect</h2>
+        <p class="access-subheading">Connect your ESP32 device for live data, or explore the dashboard in guest demo mode.</p>
+
+        <div class="access-buttons">
+          <button
+            class="btn btn-primary btn-ble"
+            id="btn-connect"
+            data-ocid="access.connect_button"
+            aria-describedby="ble-status"
+          >
+            <span class="btn-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <path d="M6.5 6.5L12 1l5.5 5.5L12 12l5.5 5.5L12 23l-5.5-5.5L12 12z"/>
+              </svg>
+            </span>
+            <span class="btn-text">
+              <strong>Connect ESP32 Device</strong>
+              <small>Via Web Bluetooth</small>
+            </span>
+          </button>
+
+          <!-- BLE Status States -->
+          <div id="ble-status" role="status" aria-live="polite">
+            <div
+              id="ble-loading"
+              class="status-indicator status-loading hidden"
+              data-ocid="access.connect_loading_state"
+            >
+              <div class="spinner"></div>
+              <span>Scanning for XCarbon device&hellip;</span>
+            </div>
+            <div
+              id="ble-error"
+              class="status-indicator status-error hidden"
+              data-ocid="access.connect_error_state"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span id="ble-error-text">Connection failed. Please try again.</span>
+            </div>
+          </div>
+
+          <div class="access-divider">
+            <span>or</span>
+          </div>
+
+          <button
+            class="btn btn-secondary btn-demo"
+            id="btn-demo"
+            data-ocid="access.demo_button"
+          >
+            <span class="btn-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            </span>
+            <span class="btn-text">
+              <strong>Enter Guest Demo</strong>
+              <small>Explore with sample data</small>
+            </span>
+          </button>
+        </div>
+
+        <p class="access-note">No account required &bull; Web Bluetooth requires Chrome on desktop</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PHASE 3: DASHBOARD ===== -->
+  <div id="dashboard" class="phase hidden">
+
+    <!-- Sticky Navigation -->
+    <header class="nav-header" id="nav-header">
+      <nav class="nav-inner">
+        <a href="#" class="nav-brand" onclick="scrollToTop(event)">
+          <span class="nav-brand-symbol">⬡</span>
+          <span class="nav-brand-name">X-CARBON</span>
+        </a>
+
+        <button
+          class="nav-hamburger"
+          id="nav-hamburger"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          aria-controls="nav-menu"
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-menu" id="nav-menu" role="menubar">
+          <li role="none">
+            <a
+              href="#section-dashboard"
+              class="nav-link"
+              data-ocid="nav.dashboard_link"
+              role="menuitem"
+              onclick="smoothScrollTo(event, 'section-dashboard')"
+            >Dashboard</a>
+          </li>
+          <li role="none">
+            <a
+              href="#section-how-it-works"
+              class="nav-link"
+              data-ocid="nav.how_it_works_link"
+              role="menuitem"
+              onclick="smoothScrollTo(event, 'section-how-it-works')"
+            >How It Works</a>
+          </li>
+          <li role="none">
+            <a
+              href="#section-impact"
+              class="nav-link"
+              data-ocid="nav.impact_link"
+              role="menuitem"
+              onclick="smoothScrollTo(event, 'section-impact')"
+            >Impact</a>
+          </li>
+        </ul>
+
+        <div class="nav-mode-badge" id="nav-mode-badge"></div>
+      </nav>
+    </header>
+
+    <!-- Section 1: Hero -->
+    <section id="section-hero" class="section section-hero">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <span class="hero-dot"></span>
+          Carbon Capture Technology
+        </div>
+        <h1 class="hero-title">
+          <span class="hero-title-line">Capture Carbon.</span>
+          <span class="hero-title-line highlight">Create Ink.</span>
+          <span class="hero-title-line">Change the Future.</span>
+        </h1>
+        <p class="hero-subtitle">
+          X-Carbon harvests soot from vehicle exhaust and transforms it into usable ink —
+          reducing air pollution one vehicle at a time.
+        </p>
+        <div class="hero-actions">
+          <a
+            href="#section-dashboard"
+            class="btn btn-primary btn-hero"
+            data-ocid="hero.primary_button"
+            onclick="smoothScrollTo(event, 'section-dashboard')"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+            View Live Data
+          </a>
+          <a
+            href="#section-how-it-works"
+            class="btn btn-ghost"
+            onclick="smoothScrollTo(event, 'section-how-it-works')"
+          >
+            How It Works
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M7 17L17 7M17 7H7M17 7v10"/>
+            </svg>
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">94%</span>
+            <span class="hero-stat-label">Soot Captured</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">1:8</span>
+            <span class="hero-stat-label">Carbon to Ink Ratio</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">PM2.5</span>
+            <span class="hero-stat-label">Particle Target</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-molecule">
+          <div class="molecule-core"></div>
+          <div class="molecule-orbit orbit-1">
+            <div class="molecule-electron"></div>
+          </div>
+          <div class="molecule-orbit orbit-2">
+            <div class="molecule-electron"></div>
+          </div>
+          <div class="molecule-orbit orbit-3">
+            <div class="molecule-electron"></div>
+          </div>
+          <div class="molecule-label">C<sub>60</sub></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Live Dashboard -->
+    <section id="section-dashboard" class="section section-metrics">
+      <div class="section-container">
+        <div class="section-header">
+          <div class="section-header-left">
+            <span class="section-eyebrow">Real-Time Monitoring</span>
+            <h2 class="section-title">Live Sensor Data</h2>
+          </div>
+          <div class="live-badge" id="live-badge">
+            <span class="live-dot"></span>
+            <span>LIVE</span>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <!-- Carbon Captured -->
+          <div class="metric-card" data-ocid="dashboard.carbon_card">
+            <div class="metric-card-header">
+              <div class="metric-icon metric-icon-carbon">
+                <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.4"/>
+                  <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
+                  <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+                  <circle cx="5" cy="12" r="1.5" fill="currentColor"/>
+                  <circle cx="19" cy="12" r="1.5" fill="currentColor"/>
+                  <line x1="12" y1="7" x2="12" y2="8.5" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="12" y1="15.5" x2="12" y2="17" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="7" y1="12" x2="8.5" y2="12" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="15.5" y1="12" x2="17" y2="12" stroke="currentColor" stroke-width="1.2"/>
+                </svg>
+              </div>
+              <span class="metric-label">Carbon Captured</span>
+            </div>
+            <div class="metric-value-wrap">
+              <span class="metric-value" id="val-carbon">—</span>
+              <span class="metric-unit">mg</span>
+            </div>
+            <div class="metric-trend" id="trend-carbon"></div>
+            <div class="metric-progress">
+              <div class="metric-progress-fill" id="progress-carbon" style="width:0%"></div>
+            </div>
+            <div class="metric-sublabel">Target: 500 mg/session</div>
+          </div>
+
+          <!-- Ink Produced -->
+          <div class="metric-card" data-ocid="dashboard.ink_card">
+            <div class="metric-card-header">
+              <div class="metric-icon metric-icon-ink">
+                <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+                  <path d="M12 2C12 2 5 10 5 15a7 7 0 0014 0C19 10 12 2 12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                  <path d="M12 22v-6" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M9 19h6" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <span class="metric-label">Ink Produced</span>
+            </div>
+            <div class="metric-value-wrap">
+              <span class="metric-value" id="val-ink">—</span>
+              <span class="metric-unit">ml</span>
+            </div>
+            <div class="metric-trend" id="trend-ink"></div>
+            <div class="metric-progress">
+              <div class="metric-progress-fill" id="progress-ink" style="width:0%"></div>
+            </div>
+            <div class="metric-sublabel">Yield efficiency: ~12%</div>
+          </div>
+
+          <!-- AQI Level -->
+          <div class="metric-card" data-ocid="dashboard.aqi_card">
+            <div class="metric-card-header">
+              <div class="metric-icon metric-icon-aqi">
+                <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+                  <path d="M2 12c0-5.5 4.5-10 10-10s10 4.5 10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M6 17c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="12" cy="19" r="2" fill="currentColor"/>
+                </svg>
+              </div>
+              <span class="metric-label">AQI Level</span>
+            </div>
+            <div class="metric-value-wrap">
+              <span class="metric-value" id="val-aqi">—</span>
+              <span class="metric-unit aqi-badge" id="aqi-badge"></span>
+            </div>
+            <div class="metric-trend" id="trend-aqi"></div>
+            <div class="aqi-bar">
+              <div class="aqi-bar-fill" id="aqi-bar-fill"></div>
+            </div>
+            <div class="metric-sublabel">0–50: Good &bull; 51–100: Moderate &bull; 101+: Unhealthy</div>
+          </div>
+
+          <!-- Vehicles Tested -->
+          <div class="metric-card" data-ocid="dashboard.vehicle_card">
+            <div class="metric-card-header">
+              <div class="metric-icon metric-icon-vehicle">
+                <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+                  <rect x="2" y="8" width="20" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M5 8L7 4h10l2 4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                  <circle cx="7" cy="20" r="2" fill="currentColor"/>
+                  <circle cx="17" cy="20" r="2" fill="currentColor"/>
+                  <path d="M7 8h10" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+                </svg>
+              </div>
+              <span class="metric-label">Vehicles Tested</span>
+            </div>
+            <div class="metric-value-wrap">
+              <span class="metric-value" id="val-vehicles">—</span>
+              <span class="metric-unit">units</span>
+            </div>
+            <div class="metric-trend" id="trend-vehicles"></div>
+            <div class="metric-progress">
+              <div class="metric-progress-fill" id="progress-vehicles" style="width:0%"></div>
+            </div>
+            <div class="metric-sublabel">Session log active</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: How It Works -->
+    <section id="section-how-it-works" class="section section-how">
+      <div class="section-container">
+        <div class="section-header center">
+          <span class="section-eyebrow">The Process</span>
+          <h2 class="section-title">How It Works</h2>
+          <p class="section-subtitle">Three elegant steps from exhaust pipe to ink cartridge.</p>
+        </div>
+
+        <div class="how-timeline">
+          <div class="how-step reveal" data-ocid="how_it_works.item.1">
+            <div class="how-step-number">01</div>
+            <div class="how-step-icon">
+              <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
+                <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+                <path d="M14 24 Q16 18 20 16 Q24 14 28 16 Q32 18 34 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <path d="M16 24 Q18 30 24 32 Q30 30 32 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <circle cx="24" cy="24" r="3" fill="currentColor"/>
+                <path d="M8 30 Q12 26 14 24" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.5"/>
+                <path d="M40 30 Q36 26 34 24" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="how-step-content">
+              <h3 class="how-step-title">Capture</h3>
+              <p class="how-step-desc">The X-Carbon device clamps onto a vehicle's exhaust pipe. A precision micro-filter traps PM2.5 soot particles — the finest and most harmful carbon particulates — before they reach the atmosphere.</p>
+            </div>
+            <div class="how-connector"></div>
+          </div>
+
+          <div class="how-step reveal" data-ocid="how_it_works.item.2">
+            <div class="how-step-number">02</div>
+            <div class="how-step-icon">
+              <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
+                <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+                <path d="M16 18h16v3l-2 2h-12l-2-2v-3z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M20 23v8l4 2 4-2v-8" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="24" cy="16" r="2" fill="currentColor" opacity="0.6"/>
+                <path d="M21 28 Q24 30 27 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="how-step-content">
+              <h3 class="how-step-title">Process</h3>
+              <p class="how-step-desc">Collected soot is transferred to a micro-processing chamber. It's blended with water, a binding polymer, and a pH stabilizer — creating a stable carbon-black ink suspension with consistent viscosity.</p>
+            </div>
+            <div class="how-connector"></div>
+          </div>
+
+          <div class="how-step reveal" data-ocid="how_it_works.item.3">
+            <div class="how-step-number">03</div>
+            <div class="how-step-icon">
+              <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
+                <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+                <rect x="14" y="20" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M18 20v-4a2 2 0 014 0v4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M26 20v-4a2 2 0 014 0v4" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="18" y="24" width="12" height="4" rx="1" fill="currentColor" opacity="0.3"/>
+                <circle cx="24" cy="26" r="1" fill="currentColor"/>
+              </svg>
+            </div>
+            <div class="how-step-content">
+              <h3 class="how-step-title">Convert</h3>
+              <p class="how-step-desc">The finished carbon ink is filtered and stored in standardized cartridges compatible with most commercial inkjet and screen-printing systems — ready for use in offices, print shops, or artistic applications.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Future Impact -->
+    <section id="section-impact" class="section section-impact">
+      <div class="section-container">
+        <div class="section-header center">
+          <span class="section-eyebrow">Why It Matters</span>
+          <h2 class="section-title">Future Impact</h2>
+          <p class="section-subtitle">Beyond ink: X-Carbon is a scalable model for turning industrial waste into valuable resources.</p>
+        </div>
+
+        <div class="impact-grid">
+          <div class="impact-card reveal" data-ocid="impact.item.1">
+            <div class="impact-icon">
+              <svg viewBox="0 0 48 48" fill="none" width="40" height="40">
+                <path d="M24 4C13 4 4 13 4 24s9 20 20 20 20-9 20-20S35 4 24 4z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M16 22 Q20 16 24 18 Q28 20 24 26 Q20 32 24 34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M20 12 Q18 18 20 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                <path d="M30 16 Q32 22 28 26" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="impact-stat">-73%</div>
+            <h3 class="impact-title">Cleaner Air</h3>
+            <p class="impact-desc">Reduce PM2.5 particulate emissions from diesel vehicles by up to 73%. Each device prevents millions of harmful particles from entering the urban atmosphere every hour of operation.</p>
+            <div class="impact-tag">Air Quality</div>
+          </div>
+
+          <div class="impact-card reveal" data-ocid="impact.item.2">
+            <div class="impact-icon">
+              <svg viewBox="0 0 48 48" fill="none" width="40" height="40">
+                <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M16 24 L20 28 L24 24 L28 28 L32 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M24 12 L24 16 M32 16 L28 20 M32 32 L28 28 M24 36 L24 32 M16 32 L20 28 M16 16 L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="impact-stat">∞</div>
+            <h3 class="impact-title">Circular Economy</h3>
+            <p class="impact-desc">Waste carbon becomes a marketable product. X-Carbon ink is sold at a fraction of commercial carbon-black ink costs, creating a self-sustaining economic model that rewards pollution reduction.</p>
+            <div class="impact-tag">Sustainability</div>
+          </div>
+
+          <div class="impact-card reveal" data-ocid="impact.item.3">
+            <div class="impact-icon">
+              <svg viewBox="0 0 48 48" fill="none" width="40" height="40">
+                <rect x="6" y="28" width="10" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="19" y="20" width="10" height="22" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="32" y="12" width="10" height="30" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M6 24 L16 18 L26 14 L42 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 2" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="impact-stat">10M+</div>
+            <h3 class="impact-title">Scalable Solution</h3>
+            <p class="impact-desc">Applicable to trucks, buses, generators, and industrial machinery. Over 10 million diesel vehicles operate in South Asia alone — each one is a potential X-Carbon deployment point and revenue source.</p>
+            <div class="impact-tag">Scale</div>
+          </div>
+        </div>
+
+        <div class="impact-cta">
+          <p class="impact-cta-text">Ready to make your vehicle part of the solution?</p>
+          <a
+            href="#section-dashboard"
+            class="btn btn-primary"
+            onclick="smoothScrollTo(event, 'section-dashboard')"
+          >View Live Dashboard</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="footer-brand-symbol">⬡</span>
+          <span class="footer-brand-name">X-CARBON</span>
+        </div>
+        <p class="footer-tagline">Turning Pollution Into Ink</p>
+        <p class="footer-copy">
+          X-Carbon &copy; <span id="footer-year"></span> &bull; Turning Pollution Into Ink
+        </p>
+        <p class="footer-attribution">
+          Built with &hearts; using <a href="https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=x-carbon" target="_blank" rel="noopener">caffeine.ai</a>
+        </p>
+      </div>
+    </footer>
+
+  </div><!-- end #dashboard -->
+
+  <script src="script.js"></script>
+</body>
+</html>
